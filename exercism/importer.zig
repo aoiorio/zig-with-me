@@ -1,0 +1,1 @@
+pub const leap = @import("exercism_leap.zig");
