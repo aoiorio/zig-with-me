@@ -15,10 +15,6 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
     
-    // NOTE this doesn't work at all'
-   
-    // b.addModule("exercism/importer.zig", exercism_module);
-
 
     const lib = b.addStaticLibrary(.{
         .name = "zig_exercism",
@@ -36,13 +32,15 @@ pub fn build(b: *std.Build) void {
 
     const exe = b.addExecutable(.{
         .name = "zig_exercism",
-        .root_source_file = b.path("exercism_test/exercism_leap_test.zig"),
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
     
     const exercism_module = b.createModule(.{
-        .root_source_file = b.path("./exercism/importer.zig"),
+        .root_source_file = b.path("exercism/importer.zig"),
+        .target = target,
+        .optimize = optimize,
     });
     
     exe.root_module.addImport("exercism", exercism_module);
@@ -78,7 +76,7 @@ pub fn build(b: *std.Build) void {
     // Creates a step for unit testing. This only builds the test executable
     // but does not run it.
     const lib_unit_tests = b.addTest(.{
-        .root_source_file = b.path("exercism_test/exercism_leap_test.zig"),
+        .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -86,11 +84,32 @@ pub fn build(b: *std.Build) void {
     const run_lib_unit_tests = b.addRunArtifact(lib_unit_tests);
 
     const exe_unit_tests = b.addTest(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    
+    // const unit_tests = b.addTest(.{
+    //     .root_source_file = b.path("exercism/importer.zig"),
+    //     // .target = target,
+    //     // .optimize = optimize,
+    // });
+    
+    // b.addModule("exercism/importer.zig", exercism_module);
+    
+    // unit_tests.root_module.addImport("exercism", exercism_module);    
+    const test_leap_tests = b.addTest(.{
         .root_source_file = b.path("exercism_test/exercism_leap_test.zig"),
         .target = target,
         .optimize = optimize,
     });
+    
+    test_leap_tests.root_module.addImport("exercism", exercism_module);
+    const run_test_leap_tests = b.addRunArtifact(test_leap_tests);
 
+    exe_unit_tests.root_module.addImport("exercism", exercism_module);
+    lib_unit_tests.root_module.addImport("exercism", exercism_module);
+    
     const run_exe_unit_tests = b.addRunArtifact(exe_unit_tests);
 
     // Similar to creating the run step earlier, this exposes a `test` step to
@@ -99,7 +118,5 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
-    
-
-
+    test_step.dependOn(&run_test_leap_tests.step);
 }

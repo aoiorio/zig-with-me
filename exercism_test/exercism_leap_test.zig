@@ -1,7 +1,7 @@
 const std = @import("std");
-const testing = std.testing;
+const leap = @import("exercism").leap;
 
-const leap = @import("../exercism/exercism_leap.zig");
+const testing = std.testing;
 
 
 pub fn main() !void {
@@ -9,5 +9,5 @@ pub fn main() !void {
 }
 
 test "year not divisible by 4 in common year" {
-    try testing.expect(!leap.isLeapYear(8888));
+    try testing.expect(!leap.isLeapYear(1900));
 }
