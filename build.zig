@@ -37,13 +37,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     
-    const exercism_module = b.createModule(.{
+    const module = b.createModule(.{
         .root_source_file = b.path("exercism/importer.zig"),
         .target = target,
         .optimize = optimize,
     });
     
-    exe.root_module.addImport("exercism", exercism_module);
+    exe.root_module.addImport("exercism", module);
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
@@ -98,17 +98,29 @@ pub fn build(b: *std.Build) void {
     // b.addModule("exercism/importer.zig", exercism_module);
     
     // unit_tests.root_module.addImport("exercism", exercism_module);    
+
+    // I get the no module named 'exercism' available within module test when I execute zig test PATH command, but ChatGPT says it's better to use zig build test to cover all tests
+    // Then I added this, above this codes you can see unit_tests const but it's writing exercism/importer.zig path, so it doesn't work because it doesn't involve the test code file path'
     const test_leap_tests = b.addTest(.{
         .root_source_file = b.path("exercism_test/exercism_leap_test.zig"),
         .target = target,
         .optimize = optimize,
     });
     
-    test_leap_tests.root_module.addImport("exercism", exercism_module);
+    test_leap_tests.root_module.addImport("exercism", module);
     const run_test_leap_tests = b.addRunArtifact(test_leap_tests);
+    
+    const test_eliuds_tests = b.addTest(.{
+        .root_source_file = b.path("exercism_test/exercism_eliuds_egg_test.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    
+    test_eliuds_tests.root_module.addImport("exercism", module);
+    const run_test_eliuds_tests = b.addRunArtifact(test_eliuds_tests);
 
-    exe_unit_tests.root_module.addImport("exercism", exercism_module);
-    lib_unit_tests.root_module.addImport("exercism", exercism_module);
+    exe_unit_tests.root_module.addImport("exercism", module);
+    lib_unit_tests.root_module.addImport("exercism", module);
     
     const run_exe_unit_tests = b.addRunArtifact(exe_unit_tests);
 
@@ -119,4 +131,6 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
     test_step.dependOn(&run_test_leap_tests.step);
+    test_step.dependOn(&run_test_eliuds_tests.step);
+
 }
