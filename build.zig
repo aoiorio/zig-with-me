@@ -118,6 +118,15 @@ pub fn build(b: *std.Build) void {
     
     test_eliuds_tests.root_module.addImport("exercism", module);
     const run_test_eliuds_tests = b.addRunArtifact(test_eliuds_tests);
+    
+    const test_difference_of_squares_tests = b.addTest(.{
+        .root_source_file = b.path("exercism_test/exercism_difference_of_squares_test.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    
+    test_difference_of_squares_tests.root_module.addImport("exercism", module);
+    const run_test_difference_of_squares_tests = b.addRunArtifact(test_difference_of_squares_tests);
 
     exe_unit_tests.root_module.addImport("exercism", module);
     lib_unit_tests.root_module.addImport("exercism", module);
@@ -132,5 +141,6 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&run_exe_unit_tests.step);
     test_step.dependOn(&run_test_leap_tests.step);
     test_step.dependOn(&run_test_eliuds_tests.step);
+    test_step.dependOn(&run_test_difference_of_squares_tests.step);
 
 }
